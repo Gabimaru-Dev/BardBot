@@ -1,0 +1,12 @@
+{
+  "name": "the-bardbot",
+  "version": "1.0.0",
+  "description": "A Telegram bot that speaketh like a bard.",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "node-telegram-bot-api": "^0.61.0"
+  }
+}
