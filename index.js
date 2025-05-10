@@ -4,7 +4,7 @@ const path = require('path');
 const express = require('express');
 
 // Your bot token here
-const TOKEN = '7508572561:AAEqTsTjzZAgt3EUR3K2yBCdxlrL6lZheds
+const TOKEN = '7508572561:AAEqTsTjzZAgt3EUR3K2yBCdxlrL6lZheds';
 const bot = new TelegramBot(TOKEN, { polling: true });
 
 // Keep-alive server for Render
