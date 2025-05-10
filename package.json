@@ -1,12 +1,22 @@
 {
-  "name": "the-bardbot",
+  "name": "noble-bard-bot",
   "version": "1.0.0",
-  "description": "A Telegram bot that speaketh like a bard.",
+  "description": "A Telegram bot powered by node-telegram-bot-api with a plugin system.",
   "main": "index.js",
   "scripts": {
     "start": "node index.js"
   },
+  "keywords": [
+    "telegram",
+    "bot",
+    "node-telegram-bot-api",
+    "plugin"
+  ],
+  "author": "Ayodele David (Gabimaru)",
+  "license": "MIT",
   "dependencies": {
-    "node-telegram-bot-api": "^0.61.0"
+    "express": "^4.18.2",
+    "node-telegram-bot-api": "^0.61.0",
+    "luxon": "^3.4.4"
   }
 }
