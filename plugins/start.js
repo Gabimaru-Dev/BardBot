@@ -20,4 +20,4 @@ module.exports = {
     menu += `\n_Use commands by sending them like: .command_`;
     bot.sendMessage(msg.chat.id, menu, { parse_mode: 'Markdown' });
   }
-};die 
+};
