@@ -1,6 +1,6 @@
 module.exports = {
-  command: 'help',
-  pattern: /\.help/,
+  command: 'start',
+  pattern: /\.start/,
   handler: (bot, msg) => {
     const text = `
 *Commands List:*
