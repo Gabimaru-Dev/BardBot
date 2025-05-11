@@ -1,43 +1,36 @@
-
 module.exports = {
   command: 'promote',
-  description: 'Promote a user to admin in the group.',
-  pattern: /^(\.promote|\/promote) (\d+)$/i,  // Matches .promote <user_id> or /promote <user_id>,
+  pattern: /^(\.|\!)promote\s+(\d+)/i,
+
   handler: async (bot, msg) => {
     const chatId = msg.chat.id;
-    const userId = msg.text.split(' ')[1]; // Extract the user ID from the message
-    const from = msg.from;
+    const userId = msg.text.split(/\s+/)[1];
+
+    if (!msg.chat.type.endsWith('group')) {
+      return bot.sendMessage(chatId, "This command only works in groups.");
+    }
 
     try {
-      // Get chat administrators
-      const chatAdministrators = await bot.getChatAdministrators(chatId);
-      const isBotAdmin = chatAdministrators.some(admin => admin.user.id === bot.options.polling.botId);
-      
-      if (!isBotAdmin) {
-        return bot.sendMessage(chatId, "⚠️ I need admin privileges to promote users.");
-      }
+      const admins = await bot.getChatAdministrators(chatId);
+      const isBotAdmin = admins.find(admin => admin.user.id === bot.botInfo.id);
+      const isSenderAdmin = admins.find(admin => admin.user.id === msg.from.id);
 
-      // Check if the user issuing the command is an admin
-      const isAdmin = chatAdministrators.some(admin => admin.user.id === from.id);
-      if (!isAdmin) {
-        return bot.sendMessage(chatId, "⚠️ Only admins can promote users.");
-      }
+      if (!isBotAdmin) return bot.sendMessage(chatId, "I need to be an admin to promote someone.");
+      if (!isSenderAdmin) return bot.sendMessage(chatId, "You must be an admin to use this command.");
 
-      // Promote the user
-      await bot.promoteChatMember(chatId, userId, {
+      await bot.promoteChatMember(chatId, parseInt(userId), {
         can_change_info: true,
-        can_post_messages: true,
-        can_edit_messages: true,
         can_delete_messages: true,
-        can_invite_to_group: true,
+        can_invite_users: true,
+        can_restrict_members: false,
         can_pin_messages: true,
+        can_promote_members: false,
+        can_manage_video_chats: true
       });
 
-      // Send confirmation
-      bot.sendMessage(chatId, `✅ User ${userId} has been promoted to admin!`);
+      bot.sendMessage(chatId, `✅ Promoted user with ID ${userId} to admin.`);
     } catch (err) {
-      console.error("Error promoting user:", err);
-      bot.sendMessage(chatId, `⚠️ Error: Could not promote the user.`);
+      bot.sendMessage(chatId, `❌ Failed to promote user ID ${userId}. Make sure the ID is correct and the user is in the group.`);
     }
   }
 };
