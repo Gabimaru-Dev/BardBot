@@ -2,11 +2,14 @@ const TelegramBot = require('node-telegram-bot-api');
 const fs = require('fs');
 const path = require('path');
 const express = require('express');
+const https = require('https');
 
 const token = '7508572561:AAEqTsTjzZAgt3EUR3K2yBCdxlrL6lZheds'; // Replace with your actual token
+const SELF_URL = 'https://your-render-app-name.onrender.com'; // Replace with your Render web app URL
+
 const bot = new TelegramBot(token, { polling: true });
 
-// Set up Express to keep the bot alive on Render (with a port for deployment)
+// Express setup to stay alive on Render
 const app = express();
 const port = process.env.PORT || 3000;
 
@@ -18,7 +21,16 @@ app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });
 
-// Load all command plugins from plugins folder
+// Self-ping every 5 minutes
+setInterval(() => {
+  https.get(SELF_URL, (res) => {
+    console.log(`Self-ping success at ${new Date().toLocaleTimeString()}`);
+  }).on('error', (err) => {
+    console.error('Self-ping failed:', err.message);
+  });
+}, 1000 * 60 * 5); // 5 minutes
+
+// Load all command plugins
 const plugins = [];
 const pluginFiles = fs.readdirSync(path.join(__dirname, 'plugins')).filter(file => file.endsWith('.js'));
 
@@ -29,12 +41,11 @@ for (const file of pluginFiles) {
   }
 }
 
-// Handle all messages
+// Message handling with multiple prefixes
 bot.on('message', async (msg) => {
   if (!msg.text) return;
   const text = msg.text.trim();
 
-  // Check for multiple prefixes (/ and .)
   for (const plugin of plugins) {
     const patterns = Array.isArray(plugin.pattern) ? plugin.pattern : [plugin.pattern];
     if (patterns.some(p => p.test(text))) {
@@ -44,7 +55,7 @@ bot.on('message', async (msg) => {
         console.error(`Error in plugin ${plugin.command}:`, err);
         bot.sendMessage(msg.chat.id, `⚠️ Error running command: ${plugin.command}`);
       }
-      break; // Stop after first matching command
+      break;
     }
   }
 });
