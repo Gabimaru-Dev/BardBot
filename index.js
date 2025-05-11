@@ -1,25 +1,37 @@
 const TelegramBot = require('node-telegram-bot-api');
 const fs = require('fs');
 const path = require('path');
-const express = require('express');
 
-// Your bot token here
-const TOKEN = '7508572561:AAEqTsTjzZAgt3EUR3K2yBCdxlrL6lZheds';
-const bot = new TelegramBot(TOKEN, { polling: true });
+const token = '7508572561:AAEqTsTjzZAgt3EUR3K2yBCdxlrL6lZheds'; // Replace with your actual token
+const bot = new TelegramBot(token, { polling: true });
 
-// Keep-alive server for Render
-const app = express();
-app.get('/', (_, res) => res.send('Bot is alive.'));
-app.listen(process.env.PORT || 3000);
+// Load all command plugins from plugins folder
+const plugins = [];
 
-// Plugin loader
-const pluginFolder = path.join(__dirname, 'plugins');
-fs.readdirSync(pluginFolder).forEach(file => {
-  if (file.endsWith('.js')) {
-    const plugin = require(path.join(pluginFolder, file));
-    bot.onText(plugin.pattern, (msg, match) => {
-      plugin.handler(bot, msg, match);
-    });
+const pluginFiles = fs.readdirSync(path.join(__dirname, 'plugins')).filter(file => file.endsWith('.js'));
+
+for (const file of pluginFiles) {
+  const plugin = require(`./plugins/${file}`);
+  if (plugin && plugin.handler && plugin.pattern) {
+    plugins.push(plugin);
+  }
+}
+
+// Handle all messages
+bot.on('message', async (msg) => {
+  if (!msg.text) return;
+  const text = msg.text.trim();
+
+  for (const plugin of plugins) {
+    const patterns = Array.isArray(plugin.pattern) ? plugin.pattern : [plugin.pattern];
+    if (patterns.some(p => p.test(text))) {
+      try {
+        await plugin.handler(bot, msg);
+      } catch (err) {
+        console.error(`Error in plugin ${plugin.command}:`, err);
+        bot.sendMessage(msg.chat.id, `⚠️ Error running command: ${plugin.command}`);
+      }
+      break; // Stop after first matching command
+    }
   }
 });
-console.log("HARK! The bard as awaken! 🧎‍➡️");
