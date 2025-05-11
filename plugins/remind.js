@@ -1,34 +1,28 @@
+const ms = require('ms');
+
 module.exports = {
   command: 'remind',
-  description: 'Set a reminder. Example: .remind 5m Take a break',
-  pattern: /^(\.|\/)remind\s+(\d+)([smh])\s+(.+)/i,
-  handler: async (bot, msg, match) => {
-    const amount = parseInt(match[2]);
-    const unit = match[3];
-    const task = match[4];
-
-    const unitMs = {
-      s: 1000,
-      m: 60_000,
-      h: 3_600_000,
-    };
-
-    if (!unitMs[unit]) {
-      return bot.sendMessage(msg.chat.id, '❌ Invalid time unit. Use s, m, or h.');
+  description: 'Set a reminder. Usage: .remind 10m Do something',
+  pattern: [/^\.remind\s+(.+)/i, /^\/remind\s+(.+)/i],
+  handler: async (bot, msg) => {
+    const match = msg.text.match(/^(\.|\/)remind\s+(\d+[smhd])\s+(.+)/i);
+    if (!match) {
+      return bot.sendMessage(msg.chat.id, '❗ Usage: .remind <time> <message>\nExample: .remind 10m Take a break');
     }
 
-    const delay = amount * unitMs[unit];
+    const [, , timeStr, reminderMsg] = match;
+    const duration = ms(timeStr);
 
-    await bot.sendMessage(
-      msg.chat.id,
-      `⏳ Reminder set for ${amount}${unit}. I'll remind you to:\n\n"${task}"`
-    );
+    if (!duration || duration < 1000 || duration > 7 * 24 * 60 * 60 * 1000) {
+      return bot.sendMessage(msg.chat.id, '❗ Please use a valid time like 10s, 5m, 1h. Max: 7d');
+    }
+
+    bot.sendMessage(msg.chat.id, `⏳ Reminder set for ${timeStr} from now! I’ll remind you.`);
 
     setTimeout(() => {
-      bot.sendMessage(
-        msg.chat.id,
-        `🔔 Reminder: ${msg.from.first_name}, don't forget to:\n\n"${task}"`
-      );
-    }, delay);
-  },
+      bot.sendMessage(msg.chat.id, `🔔 Reminder: ${reminderMsg}`, {
+        reply_to_message_id: msg.message_id,
+      });
+    }, duration);
+  }
 };
