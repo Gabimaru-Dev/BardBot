@@ -4,7 +4,7 @@ module.exports = {
   pattern: [/^\.ping$/i, /^\/ping$/i],
   handler: async (bot, msg) => {
     const start = Date.now();
-    const sent = await bot.sendMessage(msg.chat.id, '🏓 Pinging...');
+    const sent = await bot.sendMessage(msg.chat.id, '🏓 Pinging...butch');
     const diff = Date.now() - start;
 
     bot.editMessageText(`✅ Pong! ${diff}ms`, {
