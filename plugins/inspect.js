@@ -1,4 +1,4 @@
-module.exports = {
+ module.exports = {
   command: 'inspect',
   description: 'Inspect and stringify a JSON object',
   pattern: /^\.inspect (.+)$/i,
