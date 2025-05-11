@@ -3,21 +3,22 @@ const path = require('path');
 
 module.exports = {
   command: 'start',
-  pattern: /^\.start$/i,
+  description: 'Show help for all commands',
+  pattern: [/^\.start$/, /^\/start$/],
   handler: async (bot, msg) => {
-    const pluginFolder = path.join(__dirname);
-    const files = fs.readdirSync(pluginFolder).filter(f => f.endsWith('.js') && f !== 'start.js');
+    const pluginFiles = fs.readdirSync(__dirname).filter(file => file.endsWith('.js') && file !== 'start.js');
 
-    let menu = '*🤖 Command Menu*\n\n';
+    let helpText = '🤖 *Available Commands:*\n\n';
 
-    for (const file of files) {
-      const plugin = require(path.join(pluginFolder, file));
+    for (const file of pluginFiles) {
+      const plugin = require(path.join(__dirname, file));
       if (plugin.command && plugin.description) {
-        menu += `• \`.${plugin.command}\` — ${plugin.description}\n`;
+        helpText += `• \`.${plugin.command}\` / \`/${plugin.command}\` — ${plugin.description}\n`;
       }
     }
 
-    menu += `\n_Use commands by sending them like: .command_`;
-    bot.sendMessage(msg.chat.id, menu, { parse_mode: 'Markdown' });
+    helpText += `\n_Use dot (.) or slash (/) before each command._`;
+
+    await bot.sendMessage(msg.chat.id, helpText, { parse_mode: 'Markdown' });
   }
 };
