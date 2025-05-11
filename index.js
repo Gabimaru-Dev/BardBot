@@ -5,7 +5,7 @@ const express = require('express');
 const https = require('https');
 
 const token = '7508572561:AAEqTsTjzZAgt3EUR3K2yBCdxlrL6lZheds'; // Replace with your actual token
-const SELF_URL = 'https://your-render-app-name.onrender.com'; // Replace with your Render web app URL
+const SELF_URL = 'https://bardbot-3.onrender.com'; // Replace with your Render web app URL
 
 const bot = new TelegramBot(token, { polling: true });
 
