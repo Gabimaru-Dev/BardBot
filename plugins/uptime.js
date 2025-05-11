@@ -1,7 +1,7 @@
 module.exports = {
   command: 'uptime',
   description: 'Get the system uptime',
-  pattern: /^\.uptime$/i,
+  pattern: [/^\.uptime$/, /^\/uptime$/],
   handler: async (bot, msg) => {
     const os = require('os');
     const uptime = os.uptime();
