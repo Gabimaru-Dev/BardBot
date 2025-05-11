@@ -30,6 +30,44 @@ bot.onText(/^(\.|\/)(start|help)$/i, (msg) => {
   bot.sendMessage(msg.chat.id, text, { parse_mode: 'Markdown' });
 });
 
+// === WELCOME MESSAGE ===
+bot.on('new_chat_members', (msg) => {
+  const newUser = msg.new_chat_members[0];
+  const welcomeMessage = `🎉 *Welcome to the group, ${newUser.first_name}!* 🎉\n\nFeel free to introduce yourself and enjoy your stay!`;
+  
+  // Get the profile picture of the new user
+  bot.getUserProfilePhotos(newUser.id).then(photos => {
+    if (photos.total_count > 0) {
+      const photoId = photos.photos[0][0].file_id; // Get the first photo
+      bot.sendPhoto(msg.chat.id, photoId, { caption: welcomeMessage });
+    } else {
+      bot.sendMessage(msg.chat.id, welcomeMessage); // If no photo, just send the message
+    }
+  }).catch(err => {
+    console.error('Error fetching user photo:', err);
+    bot.sendMessage(msg.chat.id, welcomeMessage); // Send without photo if there's an error
+  });
+});
+
+// === LEAVE MESSAGE ===
+bot.on('left_chat_member', (msg) => {
+  const leftUser = msg.left_chat_member;
+  const leaveMessage = `😢 *Goodbye, ${leftUser.first_name}*.\n\nWe'll miss you!`;
+  
+  // Get the profile picture of the left user
+  bot.getUserProfilePhotos(leftUser.id).then(photos => {
+    if (photos.total_count > 0) {
+      const photoId = photos.photos[0][0].file_id; // Get the first photo
+      bot.sendPhoto(msg.chat.id, photoId, { caption: leaveMessage });
+    } else {
+      bot.sendMessage(msg.chat.id, leaveMessage); // If no photo, just send the message
+    }
+  }).catch(err => {
+    console.error('Error fetching user photo:', err);
+    bot.sendMessage(msg.chat.id, leaveMessage); // Send without photo if there's an error
+  });
+});
+
 // === MESSAGE HANDLER ===
 bot.on('message', async (msg) => {
   if (!msg.text) return;
