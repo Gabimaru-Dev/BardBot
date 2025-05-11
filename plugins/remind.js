@@ -7,7 +7,7 @@ module.exports = {
   handler: async (bot, msg) => {
     const match = msg.text.match(/^(\.|\/)remind\s+(\d+[smhd])\s+(.+)/i);
     if (!match) {
-      return bot.sendMessage(msg.chat.id, '❗ Usage: .remind <time> <message>\nExample: .remind 10m Take a break.\nHehe');
+      return bot.sendMessage(msg.chat.id, '❗ Usage: .remind <time> <message>\nExample: .remind 10m Take a break.');
     }
 
     const [, , timeStr, reminderMsg] = match;
