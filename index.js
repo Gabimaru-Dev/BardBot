@@ -2,18 +2,23 @@ const TelegramBot = require('node-telegram-bot-api');
 const fs = require('fs');
 const path = require('path');
 const express = require('express');
-const moment = require('moment-timezone');
 
 const token = '7508572561:AAEqTsTjzZAgt3EUR3K2yBCdxlrL6lZheds'; // Replace with your actual token
 const bot = new TelegramBot(token, { polling: true });
 
-// Create an Express app
+// Set up Express to keep the bot alive on Render (with a port for deployment)
 const app = express();
+const port = process.env.PORT || 3000;
 
-// Set the port (Render uses PORT environment variable)
-const PORT = process.env.PORT || 3000;
+app.get('/', (req, res) => {
+  res.send('Bot is running!');
+});
 
-// Load all command plugins from the plugins folder
+app.listen(port, () => {
+  console.log(`Server running on port ${port}`);
+});
+
+// Load all command plugins from plugins folder
 const plugins = [];
 const pluginFiles = fs.readdirSync(path.join(__dirname, 'plugins')).filter(file => file.endsWith('.js'));
 
@@ -29,6 +34,7 @@ bot.on('message', async (msg) => {
   if (!msg.text) return;
   const text = msg.text.trim();
 
+  // Check for multiple prefixes (/ and .)
   for (const plugin of plugins) {
     const patterns = Array.isArray(plugin.pattern) ? plugin.pattern : [plugin.pattern];
     if (patterns.some(p => p.test(text))) {
@@ -41,14 +47,4 @@ bot.on('message', async (msg) => {
       break; // Stop after first matching command
     }
   }
-});
-
-// Basic route for the Express server (just to check if it's up)
-app.get('/', (req, res) => {
-  res.send('Telegram bot is running');
-});
-
-// Start the Express server
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
 });
